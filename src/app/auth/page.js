@@ -34,7 +34,7 @@ function AuthPageContent() {
   const handleLoginChange = (e) => setLoginData({ ...loginData, [e.target.name]: e.target.value });
   const handleRegisterChange = (e) => setRegisterData({ ...registerData, [e.target.name]: e.target.value });
 
-  // --- LOGIN SUBMIT (FIXED & DEBUGGED) ---
+  // --- LOGIN SUBMIT ---
   const handleLogin = async (e) => {
     e.preventDefault();
     if (isLoading) return;
@@ -43,18 +43,12 @@ function AuthPageContent() {
     try {
       const response = await api.post("/users/login", loginData);
       
-      // --- DEBUGGING: কনসোলে রেসপন্স প্রিন্ট করা হচ্ছে ---
       console.log("SERVER RESPONSE:", response.data); 
 
-      // ১. টোকেন খোঁজা (বিভিন্ন ফরম্যাটে হতে পারে)
       const token = response.data?.token || response.data?.accessToken || response.data?.data?.token;
-      
-      // ২. ইউজার খোঁজা
       let user = response.data?.user || response.data?.userData || response.data?.data?.user;
 
       if (token) {
-        // যদি টোকেন থাকে কিন্তু ইউজার না থাকে, তবে আমরা ইমেইল দিয়ে একটি টেম্পোরারি ইউজার বানাবো
-        // যাতে ড্যাশবোর্ড ক্র্যাশ না করে
         if (!user) {
           console.warn("User object missing in response, creating fallback.");
           user = {
@@ -64,7 +58,6 @@ function AuthPageContent() {
           };
         }
 
-        // ডাটা সেভ করা
         localStorage.setItem("token", token);
         localStorage.setItem("user", JSON.stringify(user));
         
@@ -196,6 +189,7 @@ function AuthPageContent() {
   );
 }
 
+// ✅ মূল ফিক্স: Suspense ব্যবহার করা হয়েছে
 export default function AuthPage() {
   return (
     <Suspense
