@@ -8,6 +8,14 @@ import { Button } from "@/components/ui/button";
 import api from "@/lib/api";
 import { Loader2, CheckCircle2, AlertTriangle } from "lucide-react";
 
+export const dynamic = "force-dynamic";
+
+const stripHtml = (value = "") =>
+  value
+    .replace(/<[^>]*>/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
 const STATUS_CONFIG = {
   loading: {
     icon: Loader2,
@@ -54,24 +62,31 @@ export default function EmailVerificationPage() {
 
         if (!isMounted) return;
 
-        const serverMessage =
-          typeof response.data === "string" ? response.data : response.data?.message;
+        const serverMessageRaw =
+          typeof response.data === "string"
+            ? response.data
+            : response.data?.message;
 
         setStatus("success");
         setMessage(
-          serverMessage || "You're all set! Redirecting you to the login page..."
+          stripHtml(serverMessageRaw) ||
+            "You're all set! Redirecting you to the login page..."
         );
 
         redirectTimerRef.current = setTimeout(() => router.push("/auth"), 3000);
       } catch (error) {
         if (!isMounted) return;
 
-        const errMessage =
-          error?.response?.data?.message ||
+        const errPayload = error?.response?.data;
+        const errMessageRaw =
+          typeof errPayload === "string"
+            ? errPayload
+            : errPayload?.message;
+        const fallbackMessage =
           "This verification link has expired or is invalid. Please request another email.";
 
         setStatus("error");
-        setMessage(errMessage);
+        setMessage(stripHtml(errMessageRaw) || fallbackMessage);
       }
     };
 
