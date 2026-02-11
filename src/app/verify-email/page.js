@@ -3,7 +3,7 @@
 import { Suspense, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import Navbar from "@/components/Navbar";
+//import Navbar from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import api from "@/lib/api";
 import { Loader2, CheckCircle2, AlertTriangle } from "lucide-react";
@@ -105,7 +105,7 @@ function EmailVerificationContent() {
 
   return (
     <div className="min-h-screen bg-muted/30 flex flex-col">
-      <Navbar />
+      {/* <Navbar /> */}
 
       <div className="flex-1 flex items-center justify-center p-6">
         <div className="w-full max-w-lg bg-white p-8 md:p-12 rounded-2xl shadow-xl border border-gray-100 text-center animate-fade-in">
