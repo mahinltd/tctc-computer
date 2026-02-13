@@ -21,6 +21,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PRODUCT_LOGOS } from "@/data/productCatalog";
 
+const TRANSACTION_FEE = 30;
+
 const checklist = [
   "Licensed or classroom-tested resources",
   "Manual verification by TCTC accounts team",
@@ -95,6 +97,11 @@ export default function ProductDetailsPage() {
   const cover = useMemo(() => {
     if (!product) return PRODUCT_LOGOS.generic.dataUri;
     return product.thumbnailUrl || PRODUCT_LOGOS[product.logoKey]?.dataUri || PRODUCT_LOGOS.generic.dataUri;
+  }, [product]);
+
+  const totalPayable = useMemo(() => {
+    if (!product) return 0;
+    return Number(product.price || 0) + TRANSACTION_FEE;
   }, [product]);
 
   const handleCopy = () => {
@@ -220,6 +227,12 @@ export default function ProductDetailsPage() {
                 <div>
                   <p className="text-sm text-gray-500">Price</p>
                   <p className="text-4xl font-black text-gray-900">৳ {product.price}</p>
+                  <p className="mt-1 text-sm text-gray-500">+ ৳{TRANSACTION_FEE} service charge applies</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Total to send</p>
+                  <p className="text-3xl font-black text-primary">৳ {totalPayable}</p>
+                  <p className="mt-1 text-xs text-gray-500">Includes fixed accounts processing fee</p>
                 </div>
                 <div className="flex-1 space-y-2">
                   <div className="flex items-center gap-2 text-sm text-gray-500">
@@ -256,7 +269,7 @@ export default function ProductDetailsPage() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-xs uppercase tracking-[0.4em] text-primary">Secure Checkout</p>
-                    <h3 className="mt-1 text-xl font-bold text-gray-900">Send ৳{product.price} and submit the details</h3>
+                    <h3 className="mt-1 text-xl font-bold text-gray-900">Send ৳{totalPayable} (includes ৳{TRANSACTION_FEE} service charge)</h3>
                   </div>
                   <Button variant="ghost" onClick={() => setShowPaymentPanel(false)}>Close</Button>
                 </div>
@@ -271,6 +284,9 @@ export default function ProductDetailsPage() {
                       </div>
                     ) : paymentMethods.length ? (
                       <div className="space-y-3">
+                        <div className="rounded-xl border border-dashed border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+                          Please transfer ৳{totalPayable} (৳{product.price} + ৳{TRANSACTION_FEE} service charge) before submitting the form.
+                        </div>
                         {paymentMethods.map((method) => (
                           <div key={method._id} className="flex items-center justify-between rounded-xl border p-3">
                             <div>
@@ -343,7 +359,7 @@ export default function ProductDetailsPage() {
                   </div>
 
                   <p className="text-xs text-gray-500">
-                    Our accounts team will verify payments between 10:00 AM and 10:00 PM. Once approved, the download link will appear inside your Dashboard under "Digital Downloads" and you will get an email confirmation.
+                    Our accounts team will verify payments between 10:00 AM and 10:00 PM. Once approved, the download link will appear inside your Dashboard under "Digital Downloads" and you will get an email confirmation. Always send the total ৳{totalPayable} (product price + ৳{TRANSACTION_FEE} service charge) so verification is not delayed.
                   </p>
                 </div>
               </div>
