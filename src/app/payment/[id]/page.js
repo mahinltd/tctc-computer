@@ -24,6 +24,8 @@ export default function PaymentPage() {
     transactionId: ""
   });
 
+  const isOffline = formData.paymentMethod === "offline";
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -71,7 +73,7 @@ export default function PaymentPage() {
         sourceId: id, 
         paymentMethod: formData.paymentMethod,
         senderMobile: formData.senderMobile,
-        transactionId: formData.transactionId,
+        transactionId: isOffline ? (formData.transactionId || 'OFFLINE_PAYMENT') : formData.transactionId,
         amount: admission.course.fee 
       };
 
@@ -92,7 +94,7 @@ export default function PaymentPage() {
   if (loading) return <div className="h-screen flex items-center justify-center"><Loader2 className="animate-spin text-primary h-10 w-10"/></div>;
 
   const fee = admission?.course?.fee || 0;
-  const charge = 30;
+  const charge = isOffline ? 20 : 30;
   const total = fee + charge;
 
   return (
@@ -107,16 +109,17 @@ export default function PaymentPage() {
 
           <div className="p-8">
             <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-8 text-center">
-               <p className="text-gray-600 text-sm">Course Fee: ৳{fee} + Charge: ৳{charge}</p>
+               <p className="text-gray-600 text-sm">Course Fee: ৳{fee} + {isOffline ? "Offline service charge" : "Online charge"}: ৳{charge}</p>
                <h2 className="text-4xl font-extrabold text-primary mt-2">৳{total}</h2>
+               <p className="text-gray-500 text-xs mt-2">Offline at the center adds ৳20; online transfers include ৳30 processing.</p>
                <p className="text-red-500 text-xs mt-2 font-bold animate-pulse">
-                 *Please Send Money exactly this amount
+                 {isOffline ? "*Pay this amount at the coaching center desk and keep your receipt." : "*Please send exactly this amount via mobile payment."}
                </p>
             </div>
 
             <div className="mb-8">
               <h3 className="font-bold text-lg mb-4 flex items-center gap-2">
-                <Smartphone className="h-5 w-5 text-secondary" /> Step 1: Send Money
+                <Smartphone className="h-5 w-5 text-secondary" /> Step 1: Choose how you will pay
               </h3>
               
               <div className="space-y-3">
@@ -145,6 +148,11 @@ export default function PaymentPage() {
                     No active payment numbers found. Please contact Admin.
                   </div>
                 )}
+                <div className="p-4 border rounded-lg bg-blue-50 border-blue-200">
+                  <p className="font-bold text-gray-800">Offline Payment (Pay at Center)</p>
+                  <p className="text-sm text-gray-600 mt-1">Visit the coaching center front desk to pay in person. Offline payments include a ৳20 service charge.</p>
+                  <p className="text-xs text-gray-500 mt-2">Show your admission ID: {id} so we can match your payment quickly.</p>
+                </div>
               </div>
             </div>
 
@@ -164,6 +172,7 @@ export default function PaymentPage() {
                     {paymentMethods.map(m => (
                         <option key={m._id} value={m.methodName.toLowerCase()}>{m.methodName}</option>
                     ))}
+                    <option value="offline">Offline (Pay at Center - ৳20 charge)</option>
                     {paymentMethods.length === 0 && <option value="bkash">bKash</option>}
                   </select>
                 </div>
@@ -183,13 +192,13 @@ export default function PaymentPage() {
                 <div>
                   <Label>Transaction ID (TrxID)</Label>
                   <Input 
-                    required 
-                    placeholder="e.g. 8N7A6D5..." 
+                    required={!isOffline}
+                    placeholder={isOffline ? "Optional: desk receipt or note" : "e.g. 8N7A6D5..."} 
                     className="uppercase font-mono placeholder:normal-case"
                     value={formData.transactionId}
                     onChange={(e) => setFormData({...formData, transactionId: e.target.value})}
                   />
-                  <p className="text-xs text-gray-500 mt-1">Check your SMS for the TrxID.</p>
+                  <p className="text-xs text-gray-500 mt-1">{isOffline ? "Provide the desk slip number if given, otherwise leave blank." : "Check your SMS for the TrxID."}</p>
                 </div>
 
                 <Button type="submit" disabled={submitting} className="w-full h-12 text-lg font-bold bg-green-600 hover:bg-green-700">
